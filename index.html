@@ -1,65 +1,457 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Orthora Meta Launch Pack — 5×5</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Orthora — Meta Launch Pack</title>
 <style>
-:root{--bg:#0b0d10;--card:#151922;--muted:#9ba6b6;--text:#f5f7fb;--line:#252c38;--accent:#b8ff5a}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
-.wrap{max-width:1180px;margin:auto;padding:40px 22px 80px}.hero{padding:34px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,#151922,#0e1117);margin-bottom:28px}
-h1{font-size:42px;line-height:1.05;margin:0 0 10px}h2{font-size:26px;margin:0 0 8px}.sub{color:var(--muted);font-size:17px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px}.tag{display:inline-block;background:#202633;border:1px solid #303848;padding:5px 9px;border-radius:999px;color:#cbd5e1;font-size:12px;margin-bottom:12px}
-.copybox{background:#0f1319;border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-button{background:var(--accent);color:#0b0d10;border:0;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;margin-top:8px}
-.video{padding:12px 0;border-top:1px solid var(--line)}.video:first-of-type{border-top:0}.video a{color:#c9ff88;text-decoration:none}.note{color:var(--muted);font-size:13px}.warn{border-left:3px solid #f0b44c;padding-left:12px;color:#e6c98f}
-footer{margin-top:28px;color:var(--muted);font-size:13px}
+:root{
+  --bg:#f4f6f8;
+  --panel:#ffffff;
+  --ink:#111318;
+  --muted:#68707d;
+  --line:#e5e9ef;
+  --line-strong:#d8dde5;
+  --soft:#f8fafb;
+  --dark:#13161b;
+  --dark-2:#1b2027;
+  --accent:#c9ff4f;
+  --accent-ink:#182006;
+  --good:#17864c;
+  --warning:#a46510;
+  --shadow:0 12px 35px rgba(19,22,27,.07);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,a{font:inherit}
+button{cursor:pointer}
+.shell{min-height:100vh;display:grid;grid-template-columns:290px minmax(0,1fr)}
+.sidebar{
+  position:sticky;top:0;height:100vh;background:var(--dark);color:#fff;
+  padding:26px 18px 20px;display:flex;flex-direction:column;border-right:1px solid #222831;
+}
+.brand{display:flex;align-items:center;gap:11px;padding:0 10px 24px;border-bottom:1px solid #272d36}
+.logo{
+  width:36px;height:36px;border-radius:10px;background:var(--accent);color:var(--accent-ink);
+  display:grid;place-items:center;font-weight:900;letter-spacing:-.05em
+}
+.brand strong{font-size:17px;letter-spacing:-.02em}
+.brand span{display:block;color:#8f98a7;font-size:11px;margin-top:2px;text-transform:uppercase;letter-spacing:.09em}
+.side-label{color:#7e8795;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.13em;padding:22px 11px 8px}
+.nav{display:flex;flex-direction:column;gap:6px}
+.nav button{
+  width:100%;border:1px solid transparent;background:transparent;color:#b5bdc8;text-align:left;
+  padding:12px 12px;border-radius:12px;display:flex;gap:10px;align-items:flex-start;transition:.18s ease;
+}
+.nav button:hover{background:#1a1f26;color:#fff}
+.nav button.active{background:#fff;color:#111318;border-color:#fff}
+.nav-num{
+  flex:0 0 28px;height:28px;border-radius:8px;background:#252b34;color:#aeb7c2;
+  display:grid;place-items:center;font-size:11px;font-weight:800;
+}
+.nav button.active .nav-num{background:var(--accent);color:var(--accent-ink)}
+.nav-title{font-size:13px;font-weight:700;line-height:1.25}
+.nav-sub{font-size:11px;color:#737d8b;margin-top:4px;line-height:1.25}
+.nav button.active .nav-sub{color:#747b86}
+.side-spacer{flex:1}
+.side-summary{
+  border:1px solid #2a313a;background:#181c22;border-radius:14px;padding:14px;color:#b3bbc6
+}
+.side-summary strong{color:#fff;font-size:12px}
+.side-stats{display:flex;gap:16px;margin-top:10px}
+.side-stats b{display:block;color:#fff;font-size:18px;letter-spacing:-.04em}
+.side-stats span{font-size:10px;color:#77818f;text-transform:uppercase;letter-spacing:.08em}
+
+.main{min-width:0}
+.topbar{
+  height:74px;padding:0 38px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--line);background:rgba(244,246,248,.92);backdrop-filter:blur(14px);
+  position:sticky;top:0;z-index:20;
+}
+.breadcrumb{font-size:12px;color:var(--muted)}
+.breadcrumb b{color:var(--ink)}
+.top-actions{display:flex;align-items:center;gap:9px}
+.status{
+  display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border-radius:999px;background:#eaf8f0;
+  color:#176d43;font-size:12px;font-weight:750;border:1px solid #d2eddd;
+}
+.dot{width:7px;height:7px;border-radius:50%;background:#28a464}
+.btn{
+  border:1px solid var(--line-strong);background:#fff;color:var(--ink);
+  padding:9px 13px;border-radius:10px;font-size:12px;font-weight:750;transition:.15s ease;
+}
+.btn:hover{border-color:#bfc6d0;transform:translateY(-1px)}
+.btn.primary{background:var(--dark);color:#fff;border-color:var(--dark)}
+.btn.accent{background:var(--accent);color:var(--accent-ink);border-color:#bdeb3d}
+.content{max-width:1240px;margin:0 auto;padding:40px 38px 70px}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#7a8390;font-weight:800}
+.page-title{font-size:42px;line-height:1.05;letter-spacing:-.045em;margin:8px 0 12px;font-weight:720}
+.page-lede{font-size:15px;color:var(--muted);max-width:720px;line-height:1.6}
+.overview-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:30px 0}
+.metric{
+  border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:16px 17px
+}
+.metric b{display:block;font-size:25px;letter-spacing:-.04em}
+.metric span{display:block;margin-top:4px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)
+}
+.overview-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}
+.overview-card{padding:22px}
+.overview-card h3{font-size:15px;margin:0 0 5px}
+.overview-card p{font-size:12px;color:var(--muted);margin:0 0 18px}
+.distribution{display:grid;grid-template-columns:110px repeat(5,1fr);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.cell{padding:11px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);font-size:11px;text-align:center;background:#fff}
+.cell:nth-child(6n){border-right:0}.cell.head{background:#f7f9fb;font-weight:800;color:#515a66}.cell.rowhead{text-align:left;font-weight:800;background:#fbfcfd}
+.cell:last-child,.cell:nth-last-child(-n+6){border-bottom:0}
+.hook-chip{display:inline-flex;padding:4px 7px;border-radius:999px;background:#eef3f7;color:#424c58;font-weight:800}
+.launch-list{display:flex;flex-direction:column;gap:9px}
+.launch-mini{
+  border:1px solid var(--line);background:#fbfcfd;border-radius:12px;padding:12px 13px;display:flex;gap:11px;align-items:center;
+}
+.launch-mini .num{width:30px;height:30px;border-radius:9px;background:var(--dark);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:900}
+.launch-mini b{font-size:12px;display:block}.launch-mini span{font-size:11px;color:var(--muted)}
+.notice{
+  margin-top:16px;background:#fff8e9;border:1px solid #f0dfba;color:#7e5718;border-radius:12px;padding:13px 14px;font-size:12px;line-height:1.5
+}
+.block-hero{
+  padding:28px 30px;display:flex;justify-content:space-between;gap:24px;align-items:flex-start
+}
+.block-kicker{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.block-id{background:var(--dark);color:#fff;border-radius:8px;padding:5px 8px;font-size:10px;font-weight:900;letter-spacing:.08em}
+.block-angle{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.block-title{font-size:30px;letter-spacing:-.035em;margin:0 0 9px}
+.block-desc{font-size:13px;color:var(--muted);max-width:720px;line-height:1.55}
+.hero-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}
+.pill{font-size:11px;padding:6px 9px;border-radius:999px;background:#f4f7f9;border:1px solid var(--line);color:#59626f;font-weight:750}
+.section{margin-top:18px}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin:0 2px 9px}
+.section-head h3{margin:0;font-size:14px}
+.section-head p{margin:0;font-size:11px;color:var(--muted)}
+.copy-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(270px,.5fr);gap:12px}
+.copy-primary,.copy-small{padding:18px}
+.copy-primary{min-height:190px}
+.copy-small-stack{display:grid;gap:12px}
+.copy-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+.copy-label span{font-size:10px;color:#7d8693;text-transform:uppercase;letter-spacing:.09em;font-weight:850}
+.copy-btn{
+  border:1px solid var(--line);background:#f8fafb;border-radius:8px;padding:6px 8px;color:#535c68;font-size:10px;font-weight:800
+}
+.copy-text{font-size:13px;line-height:1.68;color:#242a31}
+.copy-small .copy-text{font-size:13px;font-weight:650;line-height:1.45}
+.video-list{overflow:hidden}
+.video-row{
+  display:grid;grid-template-columns:42px minmax(0,1fr) 160px;gap:16px;align-items:center;
+  padding:16px 18px;border-bottom:1px solid var(--line);
+}
+.video-row:last-child{border-bottom:0}
+.video-index{
+  width:32px;height:32px;border-radius:9px;background:#f2f4f7;color:#58616c;display:grid;place-items:center;font-size:11px;font-weight:900
+}
+.video-title{font-size:13px;font-weight:800;line-height:1.3}
+.video-hook{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.45}
+.video-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.tag{font-size:9px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;padding:4px 6px;border-radius:6px;background:#f4f6f8;color:#69727e}
+.tag.meta{background:#eef7ff;color:#2c67a4}.tag.reuse{background:#fff5e7;color:#966319}.tag.family{background:#f3f0ff;color:#6553a5}
+.video-actions{display:flex;justify-content:flex-end;gap:8px}
+.open-btn{
+  display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:1px solid var(--line-strong);background:#fff;color:#1f252c;
+  border-radius:9px;padding:8px 10px;font-size:11px;font-weight:800;white-space:nowrap
+}
+.open-btn:hover{border-color:#aeb7c3}
+.block-note{
+  margin-top:12px;padding:12px 14px;border:1px solid #f0dfba;background:#fff9ea;border-radius:12px;color:#785521;font-size:11px;line-height:1.55
+}
+.hidden{display:none!important}
+.toast{
+  position:fixed;right:22px;bottom:22px;background:#111318;color:#fff;border-radius:11px;padding:11px 14px;font-size:12px;
+  box-shadow:0 15px 45px rgba(0,0,0,.2);opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s ease;z-index:99
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.mobile-tabs{display:none}
+@media(max-width:980px){
+  .shell{grid-template-columns:1fr}.sidebar{display:none}.topbar{padding:0 18px}.content{padding:28px 18px 60px}
+  .mobile-tabs{display:flex;overflow:auto;gap:7px;margin:0 -2px 18px;padding-bottom:2px}
+  .mobile-tabs button{border:1px solid var(--line);background:#fff;padding:9px 11px;border-radius:9px;white-space:nowrap;font-size:11px;font-weight:800}
+  .mobile-tabs button.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+  .overview-grid,.copy-layout{grid-template-columns:1fr}.overview-metrics{grid-template-columns:repeat(2,1fr)}
+  .block-hero{flex-direction:column}.hero-actions{justify-content:flex-start}
+}
+@media(max-width:680px){
+  .topbar{height:64px}.top-actions .status{display:none}.top-actions .btn:not(.primary){display:none}
+  .content{padding-top:24px}.page-title{font-size:33px}.overview-metrics{grid-template-columns:1fr 1fr}
+  .distribution{grid-template-columns:90px repeat(5,1fr)}.cell{padding:9px 4px;font-size:9px}
+  .video-row{grid-template-columns:36px 1fr}.video-actions{grid-column:2;justify-content:flex-start}
+  .copy-primary{min-height:auto}.block-title{font-size:25px}
+}
 </style>
 </head>
-<body><main class="wrap">
-<section class="hero"><div class="tag">META LAUNCH PACK · 2026-10-01</div><h1>5 AdBlocks × 5 Videos</h1><p class="sub">25 launch variants, multi-hook families distributed one hook per AdBlock. Copy is ready for Meta Ads Manager.</p></section>
-<div class="grid">
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">O</div>
+      <div><strong>ORTHORA</strong><span>Launch Operations</span></div>
+    </div>
+    <div class="side-label">Launch Pack</div>
+    <nav class="nav" id="sideNav"></nav>
+    <div class="side-spacer"></div>
+    <div class="side-summary">
+      <strong>October 1 Meta Launch</strong>
+      <div class="side-stats">
+        <div><b>25</b><span>Videos</span></div>
+        <div><b>5</b><span>AdBlocks</span></div>
+        <div><b>2</b><span>Hook Families</span></div>
+      </div>
+    </div>
+  </aside>
 
-<section class="card"><div class="tag">ADBLOCK 1</div><h2>Shift Test / Hard Floors</h2>
-<div class="copybox"><div class="label">Primary Text</div><div id="pt1">Most “comfortable” shoes pass the first-hour test — and fail the shift test. If your heels, arches, knees, or back start feeling it halfway through a long day, the problem may be what your shoes were built for. Orthora Pro is designed for long hours on hard floors with structured arch support, stable cushioning, a roomy toe box, and slip-resistant grip. Try them for 45 days. Right now, Orthora is up to 70% off while sizes are available.</div><button onclick="copy('pt1',this)">Copy Primary Text</button></div>
-<div class="copybox"><div class="label">Headline</div><div id="hl1">Built for the Shift Test</div><button onclick="copy('hl1',this)">Copy Headline</button></div>
-<div class="copybox"><div class="label">Description 1</div><div id="d11">Support that lasts past hour six.</div><button onclick="copy('d11',this)">Copy</button></div>
-<div class="copybox"><div class="label">Description 2</div><div id="d21">Up to 70% off + 45-day wear test.</div><button onclick="copy('d21',this)">Copy</button></div>
-<h3>Videos</h3><div class="video"><strong>1. V0-648-H1 · 1960s Nurses — Hook 1</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/6383ac93-1928-4878-8044-8bdc9a27881e" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>2. PF Recovery Transformation — Hook 1</strong><br><a href="https://app.notion.com/p/3e28808caaac8024bc79c797250d4f34" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>3. V0-627-H1 · Podiatrist Rates 7 Shoes</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/dba3fee5-2240-4b3f-ada3-9ae1a4e9c9db" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>4. W32 · Heavier Women — Meta long-form</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/80ef8ff9-8885-4f62-864c-94606396b8f8" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>5. Comfortorthowear Winner #2 — Meta long-form</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/74cd1f7b-1289-456b-ae2c-301d841bb303" target="_blank" rel="noopener">Open asset / source ↗</a></div>
+  <div class="main">
+    <header class="topbar">
+      <div class="breadcrumb"><b>Meta Launch Pack</b> / October 1, 2026</div>
+      <div class="top-actions">
+        <span class="status"><span class="dot"></span> Live launcher</span>
+        <a class="btn" target="_blank" rel="noopener" href="https://app.notion.com/p/3ec8808caaac81d7bc4ec38939728a6f">Notion master ↗</a>
+        <button class="btn primary" id="copyTop">Copy current block</button>
+      </div>
+    </header>
 
-</section><section class="card"><div class="tag">ADBLOCK 2</div><h2>Heel Pain / Recovery</h2>
-<div class="copybox"><div class="label">Primary Text</div><div id="pt2">The real test of a work shoe is not how soft it feels in the store. It is how your feet feel after hours on concrete, tile, and hard hospital floors — and again the next morning. Orthora Pro combines structured support, stable cushioning, and room for end-of-day swelling so your shoes keep working when the day gets hard. Wear them for 45 days and compare them with your current pair. Up to 70% off while sizes last.</div><button onclick="copy('pt2',this)">Copy Primary Text</button></div>
-<div class="copybox"><div class="label">Headline</div><div id="hl2">Support for Long Days on Hard Floors</div><button onclick="copy('hl2',this)">Copy Headline</button></div>
-<div class="copybox"><div class="label">Description 1</div><div id="d12">Built for heel, arch, and all-day comfort.</div><button onclick="copy('d12',this)">Copy</button></div>
-<div class="copybox"><div class="label">Description 2</div><div id="d22">45-day wear test. Up to 70% off.</div><button onclick="copy('d22',this)">Copy</button></div>
-<h3>Videos</h3><div class="video"><strong>1. V0-648-H2 · 1960s Nurses — Hook 2</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/ab547c83-0103-479b-ae49-3b0faa9be0d8" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>2. PF Recovery Transformation — Hook 2</strong><br><a href="https://app.notion.com/p/3e28808caaac8024bc79c797250d4f34" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>3. V0-605-H1 · Top 5 Nursing Shoes Ranked</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/d959158d-5c31-4fe4-beec-c8a2784e6c50" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>4. Hoka vs Orthora · Nurse 12-Hour Shift Test</strong><br><a href="https://f.io/KE1hM-CE" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>5. W33 · ComfortWear Teachers — Meta</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/14256207-fe35-4f44-be85-6c191f7490f5" target="_blank" rel="noopener">Open asset / source ↗</a></div>
+    <main class="content">
+      <div class="mobile-tabs" id="mobileNav"></div>
 
-</section><section class="card"><div class="tag">ADBLOCK 3</div><h2>Comparison / Wrong Job</h2>
-<div class="copybox"><div class="label">Primary Text</div><div id="pt3">Hoka. Brooks. Skechers. Clogs. Memory foam. They can all feel comfortable — but comfort is not the same as being built for a full shift. Orthora Pro is made around the reality of standing, walking, pivoting, and swelling on hard floors for hours. Structured support. Stable cushioning. Roomy toe box. Slip-resistant grip. If your current shoes keep failing halfway through the day, try a shoe built for the job instead.</div><button onclick="copy('pt3',this)">Copy Primary Text</button></div>
-<div class="copybox"><div class="label">Headline</div><div id="hl3">Good Shoe. Wrong Job.</div><button onclick="copy('hl3',this)">Copy Headline</button></div>
-<div class="copybox"><div class="label">Description 1</div><div id="d13">See why workers are switching to Orthora.</div><button onclick="copy('d13',this)">Copy</button></div>
-<div class="copybox"><div class="label">Description 2</div><div id="d23">Roomy. Stable. Built for hard floors.</div><button onclick="copy('d23',this)">Copy</button></div>
-<h3>Videos</h3><div class="video"><strong>1. V0-648-H3 · 1960s Nurses — Hook 3</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/eead3eb3-4437-45a0-937a-87282f96a379" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>2. PF Recovery Transformation — Hook 3</strong><br><a href="https://app.notion.com/p/3e28808caaac8024bc79c797250d4f34" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>3. W31 · Long-Form Podiatrist Smooche</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/5f1cf665-1ead-4f5d-a33a-3b4da6af57b4" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>4. W33 · Smooche Offer — Meta</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/28c61146-4b31-4c6c-8f16-ab3db4476f40" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>5. Wasted $500 on Hokas, Brooks, Danskos</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/62d1ddf0-e021-4136-ba2f-07843673eb98" target="_blank" rel="noopener">Open asset / source ↗</a></div>
+      <section id="overviewView">
+        <div class="eyebrow">Meta / UGC launch operations</div>
+        <h1 class="page-title">October 1 Launch Pack</h1>
+        <p class="page-lede">Five clean launch groups. Each AdBlock contains five videos, its own Meta copy, and a controlled distribution of the two multi-hook families.</p>
 
-</section><section class="card"><div class="tag">ADBLOCK 4</div><h2>12-Hour Shift / Worker Proof</h2>
-<div class="copybox"><div class="label">Primary Text</div><div id="pt4">A 12-hour shift exposes what a five-minute store try-on cannot. Soft foam can flatten. Narrow shoes can feel tighter as feet swell. And a shoe built for running may not feel the same after hours of standing. Orthora Pro was built for long workdays on hard floors — with structured arch support, stable cushioning, a roomy toe box, and slip-resistant soles. Try Orthora for 45 days and judge them on your hardest shifts.</div><button onclick="copy('pt4',this)">Copy Primary Text</button></div>
-<div class="copybox"><div class="label">Headline</div><div id="hl4">Made for 10–12 Hour Shifts</div><button onclick="copy('hl4',this)">Copy Headline</button></div>
-<div class="copybox"><div class="label">Description 1</div><div id="d14">Structured support for hard-floor work.</div><button onclick="copy('d14',this)">Copy</button></div>
-<div class="copybox"><div class="label">Description 2</div><div id="d24">Try Orthora risk-free for 45 days.</div><button onclick="copy('d24',this)">Copy</button></div>
-<h3>Videos</h3><div class="video"><strong>1. V0-648-H4 · 1960s Nurses — Hook 4</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/edf044e4-0b83-4b7b-be9c-c8b541549f57" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>2. PF Recovery Transformation — Hook 4</strong><br><a href="https://app.notion.com/p/3e28808caaac8024bc79c797250d4f34" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>3. PF Top-5 Listicle · UGC Cut</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/3b5dd917-e47f-4628-a708-ee74ca2062bb" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>4. PF Top-5 Shoe Listicle VSL</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/d215f1f5-b907-461e-8ba0-060b6d49b729" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>5. CUURT 5 · Shoes Built for the Shelf</strong><br><a href="https://app.notion.com/p/3d88808caaac8092a362ffc3064093cb" target="_blank" rel="noopener">Open asset / source ↗</a></div>
+        <div class="overview-metrics">
+          <div class="metric"><b>25</b><span>Total video variants</span></div>
+          <div class="metric"><b>5</b><span>AdBlocks</span></div>
+          <div class="metric"><b>2</b><span>5-hook families distributed</span></div>
+          <div class="metric"><b>1</b><span>Already-launched creative excluded</span></div>
+        </div>
 
-</section><section class="card"><div class="tag">ADBLOCK 5</div><h2>Soft vs Supportive / Short Form</h2>
-<div class="copybox"><div class="label">Primary Text</div><div id="pt5">Soft at 8 a.m. Flat by lunch. That is the problem with a lot of “comfort” shoes: they are optimized for the first impression, not the full day. Orthora Pro is built to stay supportive through standing, walking, hard floors, and end-of-day swelling. Stable cushioning. Structured arch support. Roomy toe box. Slip-resistant grip. Up to 70% off right now with a 45-day wear test.</div><button onclick="copy('pt5',this)">Copy Primary Text</button></div>
-<div class="copybox"><div class="label">Headline</div><div id="hl5">Soft Isn’t the Same as Supportive</div><button onclick="copy('hl5',this)">Copy Headline</button></div>
-<div class="copybox"><div class="label">Description 1</div><div id="d15">Stable cushioning. Roomy toe box.</div><button onclick="copy('d15',this)">Copy</button></div>
-<div class="copybox"><div class="label">Description 2</div><div id="d25">Up to 70% off while sizes last.</div><button onclick="copy('d25',this)">Copy</button></div>
-<h3>Videos</h3><div class="video"><strong>1. V0-648-H5 · 1960s Nurses — Hook 5</strong><br><a href="https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/4a2d19b9-e9ad-4f55-815c-4cea20882f6e" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>2. PF Recovery Transformation — Hook 5</strong><br><a href="https://app.notion.com/p/3e28808caaac8024bc79c797250d4f34" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>3. Hoka vs Orthora — short export → Meta reuse</strong><br><a href="https://f.io/i3KkAAdE" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>4. W32 Heavier Women — sub-50 → Meta reuse</strong><br><a href="https://app.notion.com/p/3db8808caaac81198ccdfe87f6358a37" target="_blank" rel="noopener">Open asset / source ↗</a></div><div class="video"><strong>5. W33 Teachers — sub-50 → Meta reuse</strong><br><a href="https://app.notion.com/p/3db8808caaac8125aa5ed801dcfa712d" target="_blank" rel="noopener">Open asset / source ↗</a></div>
-<p class="note warn">Videos 3–5 are intentionally short-form Meta reuse variants. Verify the final exported short file before upload.</p>
-</section>
+        <div class="overview-grid">
+          <div class="panel overview-card">
+            <h3>Hook distribution</h3>
+            <p>Each family lands exactly once in each AdBlock. No duplicate family hooks inside the same launch group.</p>
+            <div class="distribution">
+              <div class="cell head"></div>
+              <div class="cell head">Block 1</div><div class="cell head">Block 2</div><div class="cell head">Block 3</div><div class="cell head">Block 4</div><div class="cell head">Block 5</div>
+              <div class="cell rowhead">V0-648</div>
+              <div class="cell"><span class="hook-chip">H1</span></div><div class="cell"><span class="hook-chip">H2</span></div><div class="cell"><span class="hook-chip">H3</span></div><div class="cell"><span class="hook-chip">H4</span></div><div class="cell"><span class="hook-chip">H5</span></div>
+              <div class="cell rowhead">PF Recovery</div>
+              <div class="cell"><span class="hook-chip">H1</span></div><div class="cell"><span class="hook-chip">H2</span></div><div class="cell"><span class="hook-chip">H3</span></div><div class="cell"><span class="hook-chip">H4</span></div><div class="cell"><span class="hook-chip">H5</span></div>
+            </div>
+            <div class="notice"><b>Block 5 note:</b> three videos are approved short-form repurposes from Final Review so the pack reaches 25 without pulling creatives from a different status.</div>
+          </div>
+
+          <div class="panel overview-card">
+            <h3>Launch groups</h3>
+            <p>Click any AdBlock to open its copy and five video assets.</p>
+            <div class="launch-list" id="overviewBlocks"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="blockView" class="hidden">
+        <div class="panel block-hero">
+          <div>
+            <div class="block-kicker"><span class="block-id" id="blockId"></span><span class="block-angle" id="blockAngle"></span></div>
+            <h2 class="block-title" id="blockTitle"></h2>
+            <p class="block-desc" id="blockDesc"></p>
+            <div class="meta-row">
+              <span class="pill">5 videos</span>
+              <span class="pill">Meta-ready copy</span>
+              <span class="pill" id="familyPill"></span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button class="btn" id="copyAll">Copy all copy</button>
+            <button class="btn accent" id="nextBlock">Next AdBlock →</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head"><h3>Meta copy</h3><p>Copy/paste directly into Ads Manager</p></div>
+          <div class="copy-layout">
+            <div class="panel copy-primary">
+              <div class="copy-label"><span>Primary Text</span><button class="copy-btn" data-copy="primary">Copy</button></div>
+              <div class="copy-text" id="primaryText"></div>
+            </div>
+            <div class="copy-small-stack">
+              <div class="panel copy-small">
+                <div class="copy-label"><span>Headline</span><button class="copy-btn" data-copy="headline">Copy</button></div>
+                <div class="copy-text" id="headlineText"></div>
+              </div>
+              <div class="panel copy-small">
+                <div class="copy-label"><span>Description 1</span><button class="copy-btn" data-copy="d1">Copy</button></div>
+                <div class="copy-text" id="d1Text"></div>
+              </div>
+              <div class="panel copy-small">
+                <div class="copy-label"><span>Description 2</span><button class="copy-btn" data-copy="d2">Copy</button></div>
+                <div class="copy-text" id="d2Text"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head"><h3>Videos in this AdBlock</h3><p>Five assets, one launch group</p></div>
+          <div class="panel video-list" id="videoList"></div>
+          <div class="block-note hidden" id="blockNote"></div>
+        </div>
+      </section>
+    </main>
+  </div>
 </div>
-<footer>Knee-Pain Top-5 excluded because it was already marked launched. Built for Orthora Meta launch operations.</footer>
-</main>
+<div class="toast" id="toast">Copied</div>
+
 <script>
-async function copy(id,b){const t=document.getElementById(id).innerText;await navigator.clipboard.writeText(t);const old=b.innerText;b.innerText='Copied ✓';setTimeout(()=>b.innerText=old,1200)}
+const blocks = [
+  {
+    id:"ADBLOCK 01", nav:"Shift Test", title:"Shift Test / Hard Floors", angle:"all-day support / hard-floor reality",
+    desc:"The strongest general-worker launch group: first-hour comfort versus what actually happens at hour 6, hour 8, and the walk back to the car.",
+    primary:"Most “comfortable” shoes pass the first-hour test — and fail the shift test. If your heels, arches, knees, or back start feeling it halfway through a long day, the problem may be what your shoes were built for. Orthora Pro is designed for long hours on hard floors with structured arch support, stable cushioning, a roomy toe box, and slip-resistant grip. Try them for 45 days. Right now, Orthora is up to 70% off while sizes are available.",
+    headline:"Built for the Shift Test", d1:"Support that lasts past hour six.", d2:"Up to 70% off + 45-day wear test.",
+    family:"V0-648 H1 + PF Recovery H1",
+    videos:[
+      {t:"V0-648-H1 · 1960s Nurses",h:"Have you ever wondered why nurses in the 1960s rarely complained about foot pain?",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/6383ac93-1928-4878-8044-8bdc9a27881e",tags:["Meta","V0-648 H1"]},
+      {t:"Plantar Fasciitis Recovery Transformation · Hook 1",h:"If your plantar fasciitis has been getting worse, this is the part where that stops.",u:"https://app.notion.com/p/3e28808caaac8024bc79c797250d4f34",tags:["Brief","PF Recovery H1"]},
+      {t:"V0-627-H1 · Podiatrist Rates 7 Shoes",h:"This Week · Meta export",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/dba3fee5-2240-4b3f-ada3-9ae1a4e9c9db",tags:["Meta"]},
+      {t:"W32 · Heavier Women",h:"Final Review · Meta long-form",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/80ef8ff9-8885-4f62-864c-94606396b8f8",tags:["Meta"]},
+      {t:"Comfortorthowear Winner #2",h:"Travel/listicle winner · Meta long-form",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/74cd1f7b-1289-456b-ae2c-301d841bb303",tags:["Meta"]}
+    ]
+  },
+  {
+    id:"ADBLOCK 02", nav:"Heel Pain", title:"Heel Pain / Recovery", angle:"support over softness",
+    desc:"A pain-aware group focused on the difference between instant softness and support that still feels useful after hours on concrete, tile, and hospital floors.",
+    primary:"The real test of a work shoe is not how soft it feels in the store. It is how your feet feel after hours on concrete, tile, and hard hospital floors — and again the next morning. Orthora Pro combines structured support, stable cushioning, and room for end-of-day swelling so your shoes keep working when the day gets hard. Wear them for 45 days and compare them with your current pair. Up to 70% off while sizes last.",
+    headline:"Support for Long Days on Hard Floors", d1:"Built for heel, arch, and all-day comfort.", d2:"45-day wear test. Up to 70% off.",
+    family:"V0-648 H2 + PF Recovery H2",
+    videos:[
+      {t:"V0-648-H2 · 1960s Nurses",h:"Nurses in the 1960’s had a secret you have no clue about… and it made their lives 10X easier.",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/ab547c83-0103-479b-ae49-3b0faa9be0d8",tags:["Meta","V0-648 H2"]},
+      {t:"Plantar Fasciitis Recovery Transformation · Hook 2",h:"BREAKING: Podiatrists are now recommending THIS over orthotics, injections, and physical therapy.",u:"https://app.notion.com/p/3e28808caaac8024bc79c797250d4f34",tags:["Brief","PF Recovery H2"]},
+      {t:"V0-605-H1 · Top 5 Nursing Shoes Ranked",h:"This Week · Meta export",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/d959158d-5c31-4fe4-beec-c8a2784e6c50",tags:["Meta"]},
+      {t:"Hoka vs Orthora · Nurse 12-Hour Shift Test",h:"Final Meta export",u:"https://f.io/KE1hM-CE",tags:["Meta"]},
+      {t:"W33 · ComfortWear Teachers",h:"Final Review · Meta long-form",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/14256207-fe35-4f44-be85-6c191f7490f5",tags:["Meta"]}
+    ]
+  },
+  {
+    id:"ADBLOCK 03", nav:"Wrong Job", title:"Comparison / Wrong Job", angle:"good shoe, wrong use-case",
+    desc:"Competitor and category comparison. The message is not that running shoes are bad — it is that long shifts require a different job from the shoe.",
+    primary:"Hoka. Brooks. Skechers. Clogs. Memory foam. They can all feel comfortable — but comfort is not the same as being built for a full shift. Orthora Pro is made around the reality of standing, walking, pivoting, and swelling on hard floors for hours. Structured support. Stable cushioning. Roomy toe box. Slip-resistant grip. If your current shoes keep failing halfway through the day, try a shoe built for the job instead.",
+    headline:"Good Shoe. Wrong Job.", d1:"See why workers are switching to Orthora.", d2:"Roomy. Stable. Built for hard floors.",
+    family:"V0-648 H3 + PF Recovery H3",
+    videos:[
+      {t:"V0-648-H3 · 1960s Nurses",h:"BREAKING NEWS: Modern nurses have just discovered a hidden secret to fixing foot pain that got lost after the 1960’s.",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/eead3eb3-4437-45a0-937a-87282f96a379",tags:["Meta","V0-648 H3"]},
+      {t:"Plantar Fasciitis Recovery Transformation · Hook 3",h:"Ready to quit the job you love because your feet won't let you finish a shift anymore?",u:"https://app.notion.com/p/3e28808caaac8024bc79c797250d4f34",tags:["Brief","PF Recovery H3"]},
+      {t:"W31 · Long-Form Podiatrist Smooche",h:"Final Review · Meta long-form",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/5f1cf665-1ead-4f5d-a33a-3b4da6af57b4",tags:["Meta"]},
+      {t:"W33 · Smooche Offer",h:"Final Review · Offer-led Meta iteration",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/28c61146-4b31-4c6c-8f16-ab3db4476f40",tags:["Meta"]},
+      {t:"Wasted $500 on Hokas, Brooks, Danskos",h:"Final Review · competitor frustration",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/62d1ddf0-e021-4136-ba2f-07843673eb98",tags:["Meta"]}
+    ]
+  },
+  {
+    id:"ADBLOCK 04", nav:"12-Hour Shift", title:"12-Hour Shift / Worker Proof", angle:"shift endurance / proof",
+    desc:"The hardest-workday block. Every creative reinforces the same test: what happens after many hours of standing, walking, swelling, and hard-floor pressure.",
+    primary:"A 12-hour shift exposes what a five-minute store try-on cannot. Soft foam can flatten. Narrow shoes can feel tighter as feet swell. And a shoe built for running may not feel the same after hours of standing. Orthora Pro was built for long workdays on hard floors — with structured arch support, stable cushioning, a roomy toe box, and slip-resistant soles. Try Orthora for 45 days and judge them on your hardest shifts.",
+    headline:"Made for 10–12 Hour Shifts", d1:"Structured support for hard-floor work.", d2:"Try Orthora risk-free for 45 days.",
+    family:"V0-648 H4 + PF Recovery H4",
+    videos:[
+      {t:"V0-648-H4 · 1960s Nurses",h:"If you're a nurse who struggles with foot pain despite buying “the best” shoes... these 1960s nurse photos are about to blow your mind.",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/edf044e4-0b83-4b7b-be9c-c8b541549f57",tags:["Meta","V0-648 H4"]},
+      {t:"Plantar Fasciitis Recovery Transformation · Hook 4",h:"Feet screaming by hour 6? Limping to your car after every shift? Waking up like you're stepping on glass?",u:"https://app.notion.com/p/3e28808caaac8024bc79c797250d4f34",tags:["Brief","PF Recovery H4"]},
+      {t:"PF Top-5 Listicle · UGC Cut",h:"Final Review · APR064 iteration",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/3b5dd917-e47f-4628-a708-ee74ca2062bb",tags:["Meta"]},
+      {t:"PF Top-5 Shoe Listicle VSL",h:"Final Review · V0-311 iteration",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/d215f1f5-b907-461e-8ba0-060b6d49b729",tags:["Meta"]},
+      {t:"CUURT 5 · Shoes Built for the Shelf",h:"Final Review · full Meta script in brief",u:"https://app.notion.com/p/3d88808caaac8092a362ffc3064093cb",tags:["Brief"]}
+    ]
+  },
+  {
+    id:"ADBLOCK 05", nav:"Short Form", title:"Soft vs Supportive / Short Form", angle:"fast iterations / short-form reuse",
+    desc:"A faster-testing block. Two distributed hook variants plus three existing approved short-form cuts repurposed for Meta.",
+    primary:"Soft at 8 a.m. Flat by lunch. That is the problem with a lot of “comfort” shoes: they are optimized for the first impression, not the full day. Orthora Pro is built to stay supportive through standing, walking, hard floors, and end-of-day swelling. Stable cushioning. Structured arch support. Roomy toe box. Slip-resistant grip. Up to 70% off right now with a 45-day wear test.",
+    headline:"Soft Isn’t the Same as Supportive", d1:"Stable cushioning. Roomy toe box.", d2:"Up to 70% off while sizes last.",
+    family:"V0-648 H5 + PF Recovery H5", note:"Videos 3–5 are intentionally short-form Meta repurposes. Verify the final exported short file before uploading them to Ads Manager.",
+    videos:[
+      {t:"V0-648-H5 · 1960s Nurses",h:"Sixty years ago, nurses wore shoes made specifically as part of their nursing uniform.",u:"https://next.frame.io/project/6daf6d41-6905-4bf9-972a-dd5210cdb0ff/view/4a2d19b9-e9ad-4f55-815c-4cea20882f6e",tags:["Meta","V0-648 H5"]},
+      {t:"Plantar Fasciitis Recovery Transformation · Hook 5",h:"Arches collapsing halfway through your shift? Pain moving from your feet into your back? Tired of buying shoes that quit on you?",u:"https://app.notion.com/p/3e28808caaac8024bc79c797250d4f34",tags:["Brief","PF Recovery H5"]},
+      {t:"Hoka vs Orthora · Short Export",h:"Existing sub-50 export → Meta reuse",u:"https://f.io/i3KkAAdE",tags:["Meta","Reuse"]},
+      {t:"W32 · Heavier Women · Short Cut",h:"Existing sub-50 script → Meta reuse",u:"https://app.notion.com/p/3db8808caaac81198ccdfe87f6358a37",tags:["Brief","Reuse"]},
+      {t:"W33 · Teachers · Short Cut",h:"Existing sub-50 script → Meta reuse",u:"https://app.notion.com/p/3db8808caaac8125aa5ed801dcfa712d",tags:["Brief","Reuse"]}
+    ]
+  }
+];
+
+let current = "overview";
+const el = id => document.getElementById(id);
+const toast = msg => { el("toast").textContent=msg; el("toast").classList.add("show"); setTimeout(()=>el("toast").classList.remove("show"),1300); };
+const copy = async txt => { try{ await navigator.clipboard.writeText(txt); toast("Copied to clipboard"); } catch(e){ toast("Copy failed"); } };
+
+function navButton(label,sub,key,num){
+  const b=document.createElement("button"); b.dataset.key=key;
+  b.innerHTML='<span class="nav-num">'+num+'</span><span><span class="nav-title">'+label+'</span><span class="nav-sub">'+sub+'</span></span>';
+  b.onclick=()=>show(key); return b;
+}
+function renderNav(){
+  const side=el("sideNav"); side.innerHTML="";
+  side.appendChild(navButton("Overview","25 videos · 5 groups","overview","00"));
+  blocks.forEach((b,i)=>side.appendChild(navButton(b.id.replace("ADBLOCK ","AdBlock "),b.nav,"block"+i,String(i+1).padStart(2,"0"))));
+  const mobile=el("mobileNav"); mobile.innerHTML="";
+  const ov=document.createElement("button"); ov.textContent="Overview"; ov.dataset.key="overview"; ov.onclick=()=>show("overview"); mobile.appendChild(ov);
+  blocks.forEach((b,i)=>{const x=document.createElement("button");x.textContent="Block "+(i+1);x.dataset.key="block"+i;x.onclick=()=>show("block"+i);mobile.appendChild(x)});
+}
+function renderOverview(){
+  const list=el("overviewBlocks"); list.innerHTML="";
+  blocks.forEach((b,i)=>{
+    const row=document.createElement("div"); row.className="launch-mini"; row.style.cursor="pointer";
+    row.innerHTML='<div class="num">'+String(i+1).padStart(2,"0")+'</div><div><b>'+b.title+'</b><span>'+b.angle+'</span></div>';
+    row.onclick=()=>show("block"+i);list.appendChild(row);
+  });
+}
+function tagClass(t){ if(t==="Meta")return"meta"; if(t==="Reuse")return"reuse"; if(t.includes("H"))return"family"; return""; }
+function blockCopy(b){ return "PRIMARY TEXT\\n"+b.primary+"\\n\\nHEADLINE\\n"+b.headline+"\\n\\nDESCRIPTION 1\\n"+b.d1+"\\n\\nDESCRIPTION 2\\n"+b.d2; }
+function renderBlock(i){
+  const b=blocks[i];
+  el("blockId").textContent=b.id; el("blockAngle").textContent=b.angle; el("blockTitle").textContent=b.title; el("blockDesc").textContent=b.desc;
+  el("familyPill").textContent=b.family;
+  el("primaryText").textContent=b.primary; el("headlineText").textContent=b.headline; el("d1Text").textContent=b.d1; el("d2Text").textContent=b.d2;
+  const list=el("videoList"); list.innerHTML="";
+  b.videos.forEach((v,idx)=>{
+    const row=document.createElement("div");row.className="video-row";
+    row.innerHTML='<div class="video-index">'+String(idx+1).padStart(2,"0")+'</div>'+
+      '<div><div class="video-title">'+v.t+'</div><div class="video-hook">'+v.h+'</div><div class="video-tags">'+v.tags.map(t=>'<span class="tag '+tagClass(t)+'">'+t+'</span>').join("")+'</div></div>'+
+      '<div class="video-actions"><a class="open-btn" href="'+v.u+'" target="_blank" rel="noopener">Open asset ↗</a></div>';
+    list.appendChild(row);
+  });
+  const note=el("blockNote"); if(b.note){note.textContent=b.note;note.classList.remove("hidden")} else note.classList.add("hidden");
+  el("copyAll").onclick=()=>copy(blockCopy(b));
+  el("copyTop").onclick=()=>copy(blockCopy(b));
+  el("nextBlock").textContent=i===blocks.length-1?"Back to overview":"Next AdBlock →";
+  el("nextBlock").onclick=()=>show(i===blocks.length-1?"overview":"block"+(i+1));
+  document.querySelectorAll("[data-copy]").forEach(btn=>btn.onclick=()=>{
+    const map={primary:b.primary,headline:b.headline,d1:b.d1,d2:b.d2}; copy(map[btn.dataset.copy]);
+  });
+}
+function show(key){
+  current=key;
+  document.querySelectorAll(".nav button,.mobile-tabs button").forEach(b=>b.classList.toggle("active",b.dataset.key===key));
+  if(key==="overview"){
+    el("overviewView").classList.remove("hidden");el("blockView").classList.add("hidden");
+    el("copyTop").textContent="Copy current block";el("copyTop").onclick=()=>toast("Open an AdBlock first");
+  }else{
+    const i=Number(key.replace("block",""));renderBlock(i);
+    el("overviewView").classList.add("hidden");el("blockView").classList.remove("hidden");el("copyTop").textContent="Copy current block";
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+renderNav();renderOverview();show("overview");
 </script>
-</body></html>
+</body>
+</html>
