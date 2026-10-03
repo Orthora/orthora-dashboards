@@ -1,0 +1,84 @@
+name: Verify Six Meta Video Links
+on:
+  push:
+    branches: [fix/meta-frame-link-audit-20261003]
+    paths: [.github/workflows/frame-six-video-check.yml]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Install browser reader
+        run: |
+          python -m pip -q install playwright==1.55.0
+          python -m playwright install --with-deps chromium >/dev/null
+      - name: Open each known file through its accessible share
+        shell: bash
+        run: |
+          python -u <<'PY'
+          import asyncio,json,pathlib,re,urllib.request
+          from playwright.async_api import async_playwright
+          root=pathlib.Path('verified-frame');root.mkdir();(root/'source').mkdir()
+          base='https://raw.githubusercontent.com/Orthora/orthora-dashboards/40a4e651528c078e3ef5ac3bc701501bfd8b34c5/'
+          for name in ['meta-2026-10-02.json','meta-2026-10-02-ops-v3.json','meta-2026-10-02-app-v3.js','meta-2026-10-02.html','meta-2026-10-02-copy-v2.json']:
+              (root/'source'/name).write_bytes(urllib.request.urlopen(base+name,timeout=30).read())
+          async def main():
+              async with async_playwright() as p:
+                  browser=await p.chromium.launch()
+                  sem=asyncio.Semaphore(3);results=[]
+                  async def one(n):
+                      async with sem:
+                          name=f'#V0-645_H{n}_Kyle_Meta_V1.mp4' if n else '#V0-639_Kyle_Meta_V1.mp4'
+                          ad=f'V0-645-H{n}' if n else 'V0-639-H1'
+                          context=await browser.new_context(viewport={'width':1440,'height':1100})
+                          page=await context.new_page();item={'ad':ad,'filename':name};meta=[]
+                          async def capture(resp):
+                              if resp.url!='https://api.frame.io/graphql':return
+                              try:
+                                  j=await resp.json()
+                                  def walk(v):
+                                      if isinstance(v,dict):
+                                          if v.get('name')==name:
+                                              row={k:v[k] for k in ('id','name','filetype','duration','width','height') if k in v}
+                                              for key in ('metadata','video','media','technicalMetadata','technical_metadata'):
+                                                  if isinstance(v.get(key),dict):
+                                                      row[key]={k:val for k,val in v[key].items() if isinstance(val,(int,float)) or k in ('duration','width','height','frameRate','frame_rate')}
+                                              meta.append(row)
+                                          for val in v.values():walk(val)
+                                      elif isinstance(v,list):
+                                          for val in v:walk(val)
+                                  walk(j)
+                              except Exception:pass
+                          page.on('response',lambda r:asyncio.create_task(capture(r)))
+                          try:
+                              await page.goto('https://f.io/jLWARjHx' if n else 'https://f.io/RDrFhGV0',wait_until='domcontentloaded',timeout=40000)
+                              await page.get_by_text(name,exact=True).first.wait_for(timeout=20000)
+                              if n:await page.get_by_text(name,exact=True).first.dblclick(timeout=10000)
+                              await page.wait_for_timeout(2500)
+                              item['url']=page.url;item['title']=await page.title()
+                              item['text_before_play']=(await page.locator('body').inner_text())[:4000]
+                              play=page.get_by_role('button',name=re.compile('^play',re.I)).first
+                              if await play.count():
+                                  await play.click(timeout=5000);await page.wait_for_timeout(3500)
+                              item['media']=await page.locator('video').evaluate_all('es=>es.map(v=>({duration:Number.isFinite(v.duration)?v.duration:null,width:v.videoWidth,height:v.videoHeight,currentTime:v.currentTime,paused:v.paused}))')
+                              item['text_after_play']=(await page.locator('body').inner_text())[:4000]
+                              item['download_available']=await page.get_by_role('button',name=re.compile('^download$',re.I)).count()>0
+                              await page.screenshot(path=str(root/(ad+'.png')))
+                              item['metadata']=meta
+                          except Exception as e:item['error']=str(e)[:500]
+                          results.append(item);print('VERIFIED_VIEWER '+json.dumps(item),flush=True)
+                          await context.close()
+                  await asyncio.gather(*(one(n) for n in range(6)))
+                  (root/'verified-viewers.json').write_text(json.dumps(results,indent=2))
+                  await browser.close()
+          asyncio.run(main())
+          PY
+      - name: Save viewer evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-frame-viewers
+          path: verified-frame
+          retention-days: 1
