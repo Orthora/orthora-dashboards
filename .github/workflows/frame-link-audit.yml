@@ -1,0 +1,96 @@
+name: Meta Frame Link Audit
+on:
+  push:
+    branches: [fix/meta-frame-link-audit-20261003]
+    paths: [.github/workflows/frame-link-audit.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Install browser reader
+        run: |
+          python -m pip -q install playwright==1.55.0
+          python -m playwright install --with-deps chromium >/dev/null
+      - name: Inspect only the Frame links already in the launch pack
+        shell: bash
+        run: |
+          python -u <<'PY'
+          import asyncio, json, pathlib, re, urllib.request
+          from urllib.parse import urlsplit, urlunsplit
+          from playwright.async_api import async_playwright
+          root=pathlib.Path('frame-audit');root.mkdir()
+          url='https://raw.githubusercontent.com/Orthora/orthora-dashboards/40a4e651528c078e3ef5ac3bc701501bfd8b34c5/meta-2026-10-02.json'
+          data=json.load(urllib.request.urlopen(url,timeout=30))
+          safe_keys={'id','name','filename','file_name','type','media_type','filetype','extension','parent_id','folder_id','file_id','asset_id','duration','width','height','frame_rate','fps','label','title'}
+          def clean_url(s):
+              p=urlsplit(s);return urlunsplit((p.scheme,p.netloc,p.path,'',''))
+          def extract(obj, out, depth=0):
+              if depth>25 or len(out)>180:return
+              if isinstance(obj,dict):
+                  row={k:v for k,v in obj.items() if k in safe_keys and isinstance(v,(str,int,float,bool))}
+                  if any(k in row for k in ('name','filename','file_name')) and any(k in row for k in ('id','file_id','asset_id')):out.append(row)
+                  for v in obj.values():extract(v,out,depth+1)
+              elif isinstance(obj,list):
+                  for v in obj:extract(v,out,depth+1)
+          async def main():
+              async with async_playwright() as p:
+                  browser=await p.chromium.launch(headless=True)
+                  sem=asyncio.Semaphore(4)
+                  async def visit(brief,b):
+                      async with sem:
+                          context=await browser.new_context(viewport={'width':1440,'height':1000})
+                          page=await context.new_page();records=[];net=[];tasks=[]
+                          async def capture(response):
+                              try:
+                                  if 'frame.io' not in urlsplit(response.url).hostname:return
+                                  if 'application/json' not in response.headers.get('content-type',''):return
+                                  payload=await response.json();found=[];extract(payload,found)
+                                  if found:records.extend(found);net.append({'path':clean_url(response.url),'status':response.status,'records':len(found)})
+                              except Exception:pass
+                          page.on('response',lambda r:tasks.append(asyncio.create_task(capture(r))))
+                          result={'brief':brief,'source':b['asset'],'files':[]}
+                          try:
+                              r=await page.goto(b['asset'],wait_until='domcontentloaded',timeout=45000)
+                              await page.wait_for_timeout(9000)
+                              result.update(status=r.status if r else None,final_url=clean_url(page.url),title=await page.title())
+                              result['text']=(await page.locator('body').inner_text())[:12000]
+                              result['links']=await page.locator('a[href]').evaluate_all("es=>es.map(e=>({text:e.innerText,url:e.href})).filter(e=>e.url.includes('frame.io')).map(e=>({...e,url:e.url.split('?')[0]})).slice(0,80)")
+                              login=bool(re.search(r'sign in|log in|enter your email|continue with adobe',result['text'],re.I))
+                              result['login_visible']=login
+                              # Never log in or bypass permissions. Only click video filenames visible in an accessible share.
+                              if not login:
+                                  names=await page.locator('body').evaluate("e=>Array.from(e.querySelectorAll('*')).filter(n=>n.children.length===0&&/\\.(mp4|mov|m4v)$/i.test(n.textContent.trim())).map(n=>n.textContent.trim()).filter((v,i,a)=>a.indexOf(v)===i).slice(0,12)")
+                                  source_url=page.url
+                                  for i,name in enumerate(names):
+                                      if i:
+                                          await page.goto(source_url,wait_until='domcontentloaded',timeout=25000);await page.wait_for_timeout(1500)
+                                      try:
+                                          await page.get_by_text(name,exact=True).first.dblclick(timeout=4000)
+                                          await page.wait_for_timeout(2000)
+                                          item={'filename':name,'url':page.url,'viewer_text':(await page.locator('body').inner_text())[:3000]}
+                                          # Only stable app/share links; never publish CDN signed download URLs or credentials.
+                                          item['media']=await page.locator('video').evaluate_all('es=>es.map(v=>({duration:Number.isFinite(v.duration)?v.duration:null,width:v.videoWidth,height:v.videoHeight}))')
+                                          await page.screenshot(path=str(root/(brief+'-'+str(i)+'.png')))
+                                          result['files'].append(item)
+                                      except Exception as e:result['files'].append({'filename':name,'error':str(e)[:200]})
+                              await page.screenshot(path=str(root/(brief+'.png')))
+                          except Exception as e:result['error']=str(e)[:400]
+                          await asyncio.gather(*tasks,return_exceptions=True)
+                          result['asset_records']=list({json.dumps(x,sort_keys=True):x for x in records}.values());result['network']=net
+                          (root/(brief+'.json')).write_text(json.dumps(result,indent=2))
+                          print('FRAME_AUDIT_RESULT '+json.dumps(result),flush=True)
+                          await context.close()
+                  await asyncio.gather(*(visit(k,b) for k,b in data['briefs'].items()))
+                  await browser.close()
+          asyncio.run(main())
+          PY
+      - name: Save file-matching evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frame-link-audit
+          path: frame-audit
+          retention-days: 1
