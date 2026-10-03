@@ -1,0 +1,94 @@
+name: Recheck Missing 16 Meta Links
+on:
+  push:
+    branches: [fix/meta-frame-link-audit-20261003]
+    paths: [.github/workflows/frame-missing16-recheck.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Install browser
+        run: |
+          python -m pip -q install playwright==1.55.0
+          python -m playwright install --with-deps chromium >/dev/null
+      - name: Read the three existing delivery folders
+        shell: bash
+        run: |
+          python -u <<'PY'
+          import asyncio,json,pathlib,re,urllib.request,datetime
+          from urllib.parse import urlsplit,urlunsplit
+          from playwright.async_api import async_playwright
+          root=pathlib.Path('missing16');root.mkdir()
+          pack=json.load(urllib.request.urlopen('https://raw.githubusercontent.com/Orthora/orthora-dashboards/gh-pages/meta-2026-10-02.json',timeout=20))
+          results=[]
+          def safe_url(u):
+              p=urlsplit(u);return urlunsplit((p.scheme,p.netloc,p.path,'',''))
+          async def main():
+              async with async_playwright() as p:
+                  browser=await p.chromium.launch(headless=True)
+                  async def visit(brief):
+                      ctx=await browser.new_context(viewport={'width':1440,'height':1000})
+                      page=await ctx.new_page();assets={};tasks=[]
+                      result={'brief':'V0-'+brief,'checked_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'source_url':pack['briefs'][brief]['asset'],'files':[]}
+                      async def capture(resp):
+                          try:
+                              if urlsplit(resp.url).hostname!='api.frame.io' or 'json' not in resp.headers.get('content-type',''):return
+                              payload=await resp.json()
+                              def walk(v):
+                                  if isinstance(v,dict):
+                                      name=str(v.get('name',''))
+                                      if re.search(r'V[0O]-'+brief+r'\b',name,re.I) and re.search(r'\.(mp4|mov|m4v)$',name,re.I) and v.get('id'):
+                                          assets[v['id']]={'id':v['id'],'name':name}
+                                      for z in v.values():walk(z)
+                                  elif isinstance(v,list):
+                                      for z in v:walk(z)
+                              walk(payload)
+                          except Exception:pass
+                      page.on('response',lambda r:tasks.append(asyncio.create_task(capture(r))))
+                      try:
+                          # Open an existing accessible review first. No login, permission edits or credentials.
+                          await page.goto('https://f.io/jLWARjHx',wait_until='domcontentloaded',timeout=35000)
+                          await page.wait_for_timeout(7000)
+                          result['public_review_control']={'url':safe_url(page.url),'title':await page.title(),'visible_text':(await page.locator('body').inner_text())[:700]}
+                          await page.goto(result['source_url'],wait_until='domcontentloaded',timeout=35000)
+                          await page.wait_for_timeout(8000)
+                          result.update(final_url=safe_url(page.url),title=await page.title(),visible_text=(await page.locator('body').inner_text())[:6000])
+                          result['login_visible']=bool(re.search(r'enter your email|welcome.*email|sign in to|log in to',result['visible_text'],re.I|re.S)) or urlsplit(page.url).hostname=='accounts.frame.io'
+                          await page.screenshot(path=str(root/(brief+'-folder.png')))
+                          await asyncio.gather(*tasks,return_exceptions=True)
+                          result['asset_records']=list(assets.values())
+                          if not result['login_visible']:
+                              folder_url=page.url
+                              for j,asset in enumerate(list(assets.values())):
+                                  if 'meta' not in asset['name'].lower():continue
+                                  try:
+                                      if j:
+                                          await page.goto(folder_url,wait_until='domcontentloaded',timeout=20000)
+                                          await page.wait_for_timeout(2000)
+                                      await page.get_by_text(asset['name'],exact=True).first.dblclick(timeout=7000)
+                                      await page.wait_for_timeout(2500)
+                                      item={'filename':asset['name'],'url':safe_url(page.url),'title':await page.title(),'viewer_text':(await page.locator('body').inner_text())[:1600]}
+                                      item['media']=await page.locator('video').evaluate_all('es=>es.map(v=>({duration:Number.isFinite(v.duration)?v.duration:null,width:v.videoWidth,height:v.videoHeight}))')
+                                      result['files'].append(item)
+                                  except Exception as e:result['files'].append({'filename':asset['name'],'error':str(e)[:200]})
+                      except Exception as e:result['error']=str(e)[:500]
+                      await asyncio.gather(*tasks,return_exceptions=True)
+                      results.append(result)
+                      (root/(brief+'.json')).write_text(json.dumps(result,indent=2))
+                      print('MISSING16_RESULT '+json.dumps(result),flush=True)
+                      await ctx.close()
+                  await asyncio.gather(*(visit(k) for k in ('641','652','660')))
+                  (root/'summary.json').write_text(json.dumps(results,indent=2))
+                  await browser.close()
+          asyncio.run(main())
+          PY
+      - name: Save access and file evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: missing16-recheck
+          path: missing16
+          retention-days: 1
